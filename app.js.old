@@ -10,7 +10,7 @@ var port = new SerialPort('/dev/ttyACM0', function (err) {
     }
 });
 
-const buf1 = Buffer.from([17, 0, 2, 2, 0]);
+const buf1 = Buffer.from([17, 0, 2, 2, 1]);
 console.log(buf1);
 
 port.write(buf1, function(err) {
@@ -20,6 +20,6 @@ port.write(buf1, function(err) {
     console.log('message written');
 });
 
-port.on('readable', function() {
-    console.log('Data: ', port.read());
+port.on('data', function(data) {
+    console.log('Data: ', data);
 });
