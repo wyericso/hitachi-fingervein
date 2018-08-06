@@ -1,0 +1,28 @@
+{
+  "name": "hitachi-fingervein",
+  "version": "0.0.1",
+  "description": "Hitachi finger vein device (H1E-USB) application",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wyericso/hitachi-fingervein.git"
+  },
+  "keywords": [
+    "hitachi",
+    "finger",
+    "vein",
+    "h1e-usb"
+  ],
+  "author": "Eric So",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/wyericso/hitachi-fingervein/issues"
+  },
+  "homepage": "https://github.com/wyericso/hitachi-fingervein#readme",
+  "dependencies": {
+    "serialport": "^6.2.2"
+  }
+}
