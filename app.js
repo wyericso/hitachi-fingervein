@@ -45,4 +45,25 @@ app.get('/send_encryption_key', function(req, res) {
 
 var listener = app.listen(80, function() {
     console.log('Listening on port ' + listener.address().port);
+    var crypto = require('crypto');
+
+    for (var algorithm of [ 'CAMELLIA128',
+                            'CAMELLIA-128-CBC',
+                            'CAMELLIA-128-CFB',
+                            'CAMELLIA-128-CFB1',
+                            'CAMELLIA-128-CFB8',
+                            'CAMELLIA-128-OFB',
+                            'camellia128' ]) {
+        console.log(algorithm);
+
+    //    var algorithm = 'CAMELLIA-128-ECB';   // Decryption with this algorithm shows error.
+
+        var password = Buffer.alloc(16);
+        console.log(password);
+
+        var decipher = crypto.createDecipher(algorithm, password);
+        var decrypted = decipher.update('d1e1b68145c43d2f0acbb5a89258e89b', 'hex');
+        decrypted = Buffer.concat([decrypted, decipher.final()]);
+        console.log(decrypted);
+    }
 });
