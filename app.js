@@ -8,12 +8,16 @@ var port = new SerialPort('/dev/ttyACM0', function (err) {
     }
 });
 
+const encryption = require('./build/Release/encryption');
 var m_uKttWork;
 var encryptionEnabled = false;
 
 port.on('data', function(data) {
-    console.log('Data: ', data);
     console.log('Encryption enabled: ', encryptionEnabled);
+    if (encryptionEnabled) {
+        data = encryption.DecryptBlock(m_uKttWork, data);
+    }
+    console.log('Data: ', data);
 });
 
 app.get('/', function(req, res) {
@@ -47,7 +51,6 @@ app.get('/send_encryption_key', function(req, res) {
     });
     res.redirect('/');
 
-    const encryption = require('./build/Release/encryption');
     m_uKttWork = encryption.SendEncryptionKey();
     encryptionEnabled = true;
 });

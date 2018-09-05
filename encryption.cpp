@@ -1,6 +1,6 @@
 #include <node_api.h>
 #include "camellia_es.h"
-// #include <iostream>
+#include <iostream>
 
 napi_value SendEncryptionKey(napi_env env, napi_callback_info info) {
 //    typedef unsigned int KEY_TABLE_TYPE[68];      # defined in camellia_es.h
@@ -24,12 +24,33 @@ napi_value SendEncryptionKey(napi_env env, napi_callback_info info) {
     return result;
 }
 
+napi_value DecryptBlock(napi_env env, napi_callback_info info) {
+    napi_status status;
+    size_t argc = 2;
+    napi_value argv[2];
+
+    status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+
+    napi_value result = argv[1];
+
+//    void** m_uKttWork;
+//    size_t length;
+
+//    status = napi_get_arraybuffer_info(env, argv[0], m_uKttWork, &length);
+//    std::cout << length << "\n";
+
+    return result;
+}
+
 napi_value Init(napi_env env, napi_value exports) {
     napi_status status;
     napi_value fn;
 
     status = napi_create_function(env, NULL, 0, SendEncryptionKey, NULL, &fn);
     status = napi_set_named_property(env, exports, "SendEncryptionKey", fn);
+
+    status = napi_create_function(env, NULL, 0, DecryptBlock, NULL, &fn);
+    status = napi_set_named_property(env, exports, "DecryptBlock", fn);
 
     return exports;
 }
