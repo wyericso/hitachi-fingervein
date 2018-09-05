@@ -8,8 +8,12 @@ var port = new SerialPort('/dev/ttyACM0', function (err) {
     }
 });
 
+var m_uKttWork;
+var encryptionEnabled = false;
+
 port.on('data', function(data) {
     console.log('Data: ', data);
+    console.log('Encryption enabled: ', encryptionEnabled);
 });
 
 app.get('/', function(req, res) {
@@ -29,7 +33,7 @@ app.get('/led', function(req, res) {
             }
         });
     }, 3000);
-    res.sendFile(__dirname + '/views/index.html');
+    res.redirect('/');
 });
 
 app.get('/send_encryption_key', function(req, res) {
@@ -41,10 +45,15 @@ app.get('/send_encryption_key', function(req, res) {
             return console.log('Error on write: ', err.message);
         }
     });
-    res.sendFile(__dirname + '/views/index.html');
+    res.redirect('/');
 
     const encryption = require('./build/Release/encryption');
-    console.log(encryption.SendEncryptionKey());
+    m_uKttWork = encryption.SendEncryptionKey();
+    encryptionEnabled = true;
+});
+
+app.get('/reset', function(req, res) {
+    res.redirect('/');
 });
 
 var listener = app.listen(80, function() {
