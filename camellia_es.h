@@ -45,7 +45,7 @@ void Camellia_Ekeygen_es(const int keyBitLength,
 		      const unsigned char *rawKey, 
 		      KEY_TABLE_TYPE keyTable);
 
-void Camellia_EncryptBlock(const int keyBitLength,
+void Camellia_EncryptBlock_es(const int keyBitLength,
 			   const unsigned char *plaintext, 
 			   const KEY_TABLE_TYPE keyTable, 
 			   unsigned char *cipherText);
