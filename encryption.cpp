@@ -57,12 +57,7 @@ napi_value Encrypt(napi_env env, napi_callback_info info) {
     size_t length;
 
     napi_get_buffer_info(env, argv[0], &pComm, &length);
-/*
-    for (size_t i = 0; i < length; i++) {
-        std::cout << std::hex << static_cast<int>(* ((BYTE *) (pComm) + i)) << " ";
-    }
-    std::cout << "\n";
-*/
+
     // Encrypt data.
 
     BYTE pBuff[1024] {};
