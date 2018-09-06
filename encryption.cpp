@@ -6,66 +6,71 @@
 typedef unsigned char BYTE;
 KEY_TABLE_TYPE m_uKttWork {};
 
-napi_value SendEncryptionKey(napi_env env, napi_callback_info info) {
+napi_value Ekeygen(napi_env env, napi_callback_info info) {
 
     BYTE m_byCurrentWorkKey[16] {};         // Hard-coded key as 0x00 x 16.
 
     Camellia_Ekeygen_es(128, m_byCurrentWorkKey, m_uKttWork);
 
-    napi_status status;
     napi_value result;
-    status = napi_create_array(env, &result);
+    napi_create_array(env, &result);
 
     napi_value number;
     for (int i = 0; i < static_cast<int>(sizeof(m_uKttWork) / sizeof(m_uKttWork[0])); i++) {
-        status = napi_create_uint32(env, m_uKttWork[i], &number);
-        status = napi_set_element(env, result, i, number);
+        napi_create_uint32(env, m_uKttWork[i], &number);
+        napi_set_element(env, result, i, number);
     }
 
     return result;
 }
 
-napi_value DecryptBlock(napi_env env, napi_callback_info info) {
-    napi_status status;
-    size_t argc = 3;
+napi_value Decrypt(napi_env env, napi_callback_info info) {
+    size_t argc = 2;
     napi_value argv[argc];
 
-    status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
 
-    napi_value result, elem;
-    uint32_t number;
+    // Get m_uKttWork.
+
+    napi_value elem;
 
     for (uint32_t i = 0; i < sizeof(m_uKttWork) / sizeof(m_uKttWork[0]); i++) {
-        status = napi_get_element(env, argv[0], i, &elem);
-        status = napi_get_value_uint32(env, elem, m_uKttWork + i);
+        napi_get_element(env, argv[0], i, &elem);
+        napi_get_value_uint32(env, elem, m_uKttWork + i);
     }
+
+    // Get data and data length.
 
     void *buf;
     size_t length;
-/*
-    status = napi_get_buffer_info(env, argv[1], &buf, &length);
 
-    for (size_t i = 0; i < length; i++) {
-        std::cout << std::hex << static_cast<unsigned int>(*(BYTE *) (buf + i)) << " ";
+    napi_get_buffer_info(env, argv[1], &buf, &length);
+
+    // Decrypt data.
+
+    BYTE pComm[1024] {};
+
+    for (size_t i = 0; i < length; i+=16) {
+        Camellia_DecryptBlock_es(128, (BYTE *) (buf + i), m_uKttWork, pComm + i);
     }
-    std::cout << "\n";
 
-    BYTE *pComm;
+    // Consolidate output and return.
 
-    for ()
-*/
-    return elem;
+    napi_value decrypted;
+
+    napi_create_buffer_copy(env, length, pComm, nullptr, &decrypted);
+
+    return decrypted;
 }
 
 napi_value Init(napi_env env, napi_value exports) {
-    napi_status status;
     napi_value fn;
 
-    status = napi_create_function(env, NULL, 0, SendEncryptionKey, NULL, &fn);
-    status = napi_set_named_property(env, exports, "SendEncryptionKey", fn);
+    napi_create_function(env, NULL, 0, Ekeygen, NULL, &fn);
+    napi_set_named_property(env, exports, "Ekeygen", fn);
 
-    status = napi_create_function(env, NULL, 0, DecryptBlock, NULL, &fn);
-    status = napi_set_named_property(env, exports, "DecryptBlock", fn);
+    napi_create_function(env, NULL, 0, Decrypt, NULL, &fn);
+    napi_set_named_property(env, exports, "Decrypt", fn);
 
     return exports;
 }

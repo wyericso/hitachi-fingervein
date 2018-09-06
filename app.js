@@ -31,7 +31,7 @@ function ledoff() {
 port.on('data', function(data) {
     console.log('Encryption enabled: ', encryptionEnabled);
     if (encryptionEnabled) {
-        data = encryption.DecryptBlock(m_uKttWork, data, data.length);
+        data = encryption.Decrypt(m_uKttWork, data);
     }
     console.log('Data: ', data);
 });
@@ -61,7 +61,7 @@ app.get('/send_encryption_key', function(req, res) {
     });
     res.redirect('/');
 
-    m_uKttWork = encryption.SendEncryptionKey();
+    m_uKttWork = encryption.Ekeygen();
     encryptionEnabled = true;
 });
 
