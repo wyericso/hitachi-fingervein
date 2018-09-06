@@ -12,46 +12,30 @@ napi_value Ekeygen(napi_env env, napi_callback_info info) {
 
     Camellia_Ekeygen_es(128, m_byCurrentWorkKey, m_uKttWork);
 
-    napi_value result;
-    napi_create_array(env, &result);
-
-    napi_value number;
-    for (int i = 0; i < static_cast<int>(sizeof(m_uKttWork) / sizeof(m_uKttWork[0])); i++) {
-        napi_create_uint32(env, m_uKttWork[i], &number);
-        napi_set_element(env, result, i, number);
-    }
+    napi_value result {};
 
     return result;
 }
 
 napi_value Decrypt(napi_env env, napi_callback_info info) {
-    size_t argc = 2;
+    size_t argc = 1;
     napi_value argv[argc];
 
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-
-    // Get m_uKttWork.
-
-    napi_value elem;
-
-    for (uint32_t i = 0; i < sizeof(m_uKttWork) / sizeof(m_uKttWork[0]); i++) {
-        napi_get_element(env, argv[0], i, &elem);
-        napi_get_value_uint32(env, elem, m_uKttWork + i);
-    }
 
     // Get data and data length.
 
     void *buf;
     size_t length;
 
-    napi_get_buffer_info(env, argv[1], &buf, &length);
+    napi_get_buffer_info(env, argv[0], &buf, &length);
 
     // Decrypt data.
 
     BYTE pComm[1024] {};
 
     for (size_t i = 0; i < length; i+=16) {
-        Camellia_DecryptBlock_es(128, (BYTE *) (buf + i), m_uKttWork, pComm + i);
+        Camellia_DecryptBlock_es(128, (BYTE *) (buf) + i, m_uKttWork, pComm + i);
     }
 
     // Consolidate output and return.

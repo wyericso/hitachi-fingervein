@@ -9,7 +9,6 @@ var port = new SerialPort('/dev/ttyACM0', function (err) {
 });
 
 const encryption = require('./build/Release/encryption');
-var m_uKttWork;
 var encryptionEnabled = false;
 
 function ledon() {
@@ -31,7 +30,7 @@ function ledoff() {
 port.on('data', function(data) {
     console.log('Encryption enabled: ', encryptionEnabled);
     if (encryptionEnabled) {
-        data = encryption.Decrypt(m_uKttWork, data);
+        data = encryption.Decrypt(data);
     }
     console.log('Data: ', data);
 });
@@ -52,7 +51,7 @@ app.get('/ledoff', function(req, res) {
 
 app.get('/send_encryption_key', function(req, res) {
     const buf = Buffer.concat([Buffer.from([0x1f, 0x02, 0x00]), Buffer.alloc(512)]);
-    console.log(buf);
+    console.log('Send: ', buf);
 
     port.write(buf, function(err) {
         if (err) {
@@ -61,7 +60,7 @@ app.get('/send_encryption_key', function(req, res) {
     });
     res.redirect('/');
 
-    m_uKttWork = encryption.Ekeygen();
+    encryption.Ekeygen();
     encryptionEnabled = true;
 });
 
