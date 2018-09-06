@@ -12,10 +12,26 @@ const encryption = require('./build/Release/encryption');
 var m_uKttWork;
 var encryptionEnabled = false;
 
+function ledon() {
+    port.write(Buffer.from([0x11, 0x00, 0x02, 0x02, 0x01]), function(err) {
+        if (err) {
+            return console.log('Error on write: ', err.message);
+        }
+    });
+}
+
+function ledoff() {
+    port.write(Buffer.from([0x11, 0x00, 0x02, 0x02, 0x00]), function(err) {
+        if (err) {
+            return console.log('Error on write: ', err.message);
+        }
+    });
+}
+
 port.on('data', function(data) {
     console.log('Encryption enabled: ', encryptionEnabled);
     if (encryptionEnabled) {
-        data = encryption.DecryptBlock(m_uKttWork, data);
+        data = encryption.DecryptBlock(m_uKttWork, data, data.length);
     }
     console.log('Data: ', data);
 });
@@ -24,19 +40,13 @@ app.get('/', function(req, res) {
     res.sendFile(__dirname + '/views/index.html');
 });
 
-app.get('/led', function(req, res) {
-    port.write(Buffer.from([0x11, 0x00, 0x02, 0x02, 0x01]), function(err) {
-        if (err) {
-            return console.log('Error on write: ', err.message);
-        }
-    });
-    setTimeout(() => {
-        port.write(Buffer.from([0x11, 0x00, 0x02, 0x02, 0x00]), function(err) {
-            if (err) {
-                return console.log('Error on write: ', err.message);
-            }
-        });
-    }, 3000);
+app.get('/ledon', function(req, res) {
+    ledon();
+    res.redirect('/');
+});
+
+app.get('/ledoff', function(req, res) {
+    ledoff();
     res.redirect('/');
 });
 
@@ -56,6 +66,11 @@ app.get('/send_encryption_key', function(req, res) {
 });
 
 app.get('/reset', function(req, res) {
+    var intervalID = setInterval(ledoff, 3000);
+    setTimeout(() => {
+        clearInterval(intervalID);
+    }, 20000);
+    encryptionEnabled = false;
     res.redirect('/');
 });
 

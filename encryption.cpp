@@ -2,12 +2,13 @@
 #include "camellia_es.h"
 #include <iostream>
 
+// typedef unsigned int KEY_TABLE_TYPE[68];      # defined in camellia_es.h
+typedef unsigned char BYTE;
+KEY_TABLE_TYPE m_uKttWork {};
+
 napi_value SendEncryptionKey(napi_env env, napi_callback_info info) {
-//    typedef unsigned int KEY_TABLE_TYPE[68];      # defined in camellia_es.h
-    typedef unsigned char BYTE;
 
     BYTE m_byCurrentWorkKey[16] {};         // Hard-coded key as 0x00 x 16.
-    KEY_TABLE_TYPE m_uKttWork {};
 
     Camellia_Ekeygen_es(128, m_byCurrentWorkKey, m_uKttWork);
 
@@ -26,20 +27,34 @@ napi_value SendEncryptionKey(napi_env env, napi_callback_info info) {
 
 napi_value DecryptBlock(napi_env env, napi_callback_info info) {
     napi_status status;
-    size_t argc = 2;
-    napi_value argv[2];
+    size_t argc = 3;
+    napi_value argv[argc];
 
     status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
 
-    napi_value result = argv[1];
+    napi_value result, elem;
+    uint32_t number;
 
-//    void** m_uKttWork;
-//    size_t length;
+    for (uint32_t i = 0; i < sizeof(m_uKttWork) / sizeof(m_uKttWork[0]); i++) {
+        status = napi_get_element(env, argv[0], i, &elem);
+        status = napi_get_value_uint32(env, elem, m_uKttWork + i);
+    }
 
-//    status = napi_get_arraybuffer_info(env, argv[0], m_uKttWork, &length);
-//    std::cout << length << "\n";
+    void *buf;
+    size_t length;
+/*
+    status = napi_get_buffer_info(env, argv[1], &buf, &length);
 
-    return result;
+    for (size_t i = 0; i < length; i++) {
+        std::cout << std::hex << static_cast<unsigned int>(*(BYTE *) (buf + i)) << " ";
+    }
+    std::cout << "\n";
+
+    BYTE *pComm;
+
+    for ()
+*/
+    return elem;
 }
 
 napi_value Init(napi_env env, napi_value exports) {
