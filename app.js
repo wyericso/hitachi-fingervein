@@ -16,6 +16,7 @@ port.on('data', function(data) {
         data = encryption.Decrypt(data);
     }
     console.log('Data: ', data);
+    console.log('Data length: ', data.length);
 });
 
 // Load encryption module.
@@ -82,6 +83,25 @@ app.get('/send_encryption_key', function(req, res) {
 
     encryption.Ekeygen();
     encryptionEnabled = true;
+});
+
+app.get('/receive_template', function(req, res) {
+    if (encryptionEnabled) {
+        var buf = Buffer.from([0x15, 0x00, 0x00]);
+        buf = Buffer.concat([buf, Buffer.alloc(16 - buf.length)]);
+        buf = encryption.Encrypt(buf);
+
+        port.write(buf, function(err) {
+            if (err) {
+                return console.log('Error on write: ', err.message);
+            }
+            else {
+                console.log('Send: ', buf);
+            }
+        });
+    }
+
+    res.redirect('/');
 });
 
 app.get('/reset', function(req, res) {
