@@ -1,6 +1,15 @@
 var express = require('express');
 var app = express();
 
+function checksum(data) {
+    var offset = cs = 0;
+    while (offset < data.length) {
+        cs = cs ^ data.readInt32BE(offset);
+        offset += 4;
+    }
+    return cs;
+}
+
 // Open serial port for H1E-USB communication.
 
 var SerialPort = require('serialport');
@@ -17,11 +26,18 @@ port.on('data', function(data) {
     }
     if (receivingTemplate) {
         template = Buffer.concat([template, data]);
-        if (template.length == 544) {
+        if (template.length === 544) {
             receivingTemplate = false;
-            template = template.slice(4, 540);
-            console.log('Template: ', template);
-            console.log('Template length: ', template.length);
+
+            // If checksum is correct.
+            if (template.readInt32BE(540) === checksum(template.slice(0, 540))) {
+                template = template.slice(4, 540);
+                console.log('Template: ', template);
+                console.log('Template length: ', template.length);
+            }
+            else {
+                template = false;
+            }
         }
     }
     console.log('Data: ', data);
@@ -34,8 +50,7 @@ const encryption = require('./build/Release/encryption');
 
 // Initialize variables.
 
-var encryptionEnabled = receivingTemplate = false;
-var template;
+var encryptionEnabled = receivingTemplate = template = false;
 
 // Different actions defined below.
 
@@ -108,6 +123,33 @@ app.get('/receive_template', function(req, res) {
                 console.log('Send: ', buf);
             }
         });
+    }
+
+    res.redirect('/');
+});
+
+app.get('/send_template', function(req, res) {
+    console.log('Have template? ', Boolean(template));
+    if (template) {
+        var buf = Buffer.from([0x12, 0x02, 0x1d, 0x00]);
+        buf = Buffer.concat([buf, template]);
+
+        // Adding checksum.  
+        var csBuf = Buffer.alloc(4);
+        csBuf.writeInt32BE(checksum(buf), 0);
+        buf = Buffer.concat([buf, csBuf]);
+
+        buf = encryption.Encrypt(buf);
+
+        port.write(buf, function(err) {
+            if (err) {
+                return console.log('Error on write: ', err.message);
+            }
+            else {
+                console.log('Send: ', buf);
+            }
+        });
+        template = false;
     }
 
     res.redirect('/');
