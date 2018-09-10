@@ -1,6 +1,5 @@
 #include <node_api.h>
 #include "camellia_es.h"
-#include <iostream>
 
 // typedef unsigned int KEY_TABLE_TYPE[68];      # defined in camellia_es.h
 typedef unsigned char BYTE;

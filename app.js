@@ -26,22 +26,28 @@ port.on('data', function(data) {
     }
     if (receivingTemplate) {
         template = Buffer.concat([template, data]);
+
+        // If all bytes received.
         if (template.length === 544) {
             receivingTemplate = false;
 
             // If checksum is correct.
             if (template.readInt32BE(540) === checksum(template.slice(0, 540))) {
                 template = template.slice(4, 540);
-                console.log('Template: ', template);
-                console.log('Template length: ', template.length);
             }
             else {
                 template = false;
             }
         }
     }
-    console.log('Data: ', data);
-    console.log('Data length: ', data.length);
+//    console.log('Data: ', data);
+//    console.log('Data length: ', data.length);
+    if (data.readInt8(0) === 0) {
+        console.log('OK');
+    }
+    else {
+        console.log('Error: 0x', data.readInt8(3).toString(16).padStart(2, '0'));
+    }
 });
 
 // Load encryption module.
@@ -107,50 +113,52 @@ app.get('/send_encryption_key', function(req, res) {
 });
 
 app.get('/receive_template', function(req, res) {
-    if (encryptionEnabled) {
-        receivingTemplate = true;
-        template = Buffer.from([]);
+    receivingTemplate = true;
+    template = Buffer.from([]);
 
-        var buf = Buffer.from([0x15, 0x00, 0x00]);
+    var buf = Buffer.from([0x15, 0x00, 0x00]);
+
+    if (encryptionEnabled) {
         buf = Buffer.concat([buf, Buffer.alloc(16 - buf.length)]);
         buf = encryption.Encrypt(buf);
-
-        port.write(buf, function(err) {
-            if (err) {
-                return console.log('Error on write: ', err.message);
-            }
-            else {
-                console.log('Send: ', buf);
-            }
-        });
     }
+
+    port.write(buf, function(err) {
+        if (err) {
+            return console.log('Error on write: ', err.message);
+        }
+        else {
+            console.log('Send: ', buf);
+        }
+    });
 
     res.redirect('/');
 });
 
 app.get('/send_template', function(req, res) {
-    console.log('Have template? ', Boolean(template));
+    var buf = Buffer.from([0x12, 0x02, 0x1d, 0x00]);
+
     if (template) {
-        var buf = Buffer.from([0x12, 0x02, 0x1d, 0x00]);
         buf = Buffer.concat([buf, template]);
-
-        // Adding checksum.  
-        var csBuf = Buffer.alloc(4);
-        csBuf.writeInt32BE(checksum(buf), 0);
-        buf = Buffer.concat([buf, csBuf]);
-
-        buf = encryption.Encrypt(buf);
-
-        port.write(buf, function(err) {
-            if (err) {
-                return console.log('Error on write: ', err.message);
-            }
-            else {
-                console.log('Send: ', buf);
-            }
-        });
-        template = false;
     }
+
+    // Adding checksum.  
+    var csBuf = Buffer.alloc(4);
+    csBuf.writeInt32BE(checksum(buf), 0);
+    buf = Buffer.concat([buf, csBuf]);
+
+    if (encryptionEnabled) {
+        buf = encryption.Encrypt(buf);
+    }
+
+    port.write(buf, function(err) {
+        if (err) {
+            return console.log('Error on write: ', err.message);
+        }
+        else {
+            console.log('Send: ', buf);
+        }
+    });
 
     res.redirect('/');
 });
