@@ -29,7 +29,6 @@ var encryptionEnabled = receivingTemplate = template = false;
 var fulldata = Buffer.alloc(0);
 
 port.on('data', function(data) {
-    console.log('Encryption enabled: ', encryptionEnabled);
     if (encryptionEnabled) {
         data = encryption.Decrypt(data);
     }
@@ -38,6 +37,7 @@ port.on('data', function(data) {
 
     // If all bytes received.
     if (fulldata.length >= fulldata.readUInt16BE(1) + 3) {
+        console.log('Encryption enabled: ', encryptionEnabled);
 
         // Analyze return code.
         if (fulldata.readInt8(0) === 0) {
@@ -131,9 +131,6 @@ app.get('/receive_template', function(req, res) {
         if (err) {
             return console.log('Error on write: ', err.message);
         }
-        else {
-            console.log('Send: ', buf);
-        }
     });
 
     res.redirect('/');
@@ -159,9 +156,6 @@ app.get('/send_template', function(req, res) {
         if (err) {
             return console.log('Error on write: ', err.message);
         }
-        else {
-            console.log('Send: ', buf);
-        }
     });
 
     res.redirect('/');
@@ -183,6 +177,11 @@ app.get('/reset', function(req, res) {
 
     encryptionEnabled = false;
     res.redirect('/');
+});
+
+process.on('SIGINT', function() {
+    port.destroy();
+    process.exit();
 });
 
 var listener = app.listen(80, function() {
