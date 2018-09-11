@@ -19,37 +19,6 @@ var port = new SerialPort('/dev/ttyACM0', function (err) {
     }
 });
 
-port.on('data', function(data) {
-    console.log('Encryption enabled: ', encryptionEnabled);
-    if (encryptionEnabled) {
-        data = encryption.Decrypt(data);
-    }
-    if (receivingTemplate) {
-        template = Buffer.concat([template, data]);
-
-        // If all bytes received.
-        if (template.length === 544) {
-            receivingTemplate = false;
-
-            // If checksum is correct.
-            if (template.readInt32BE(540) === checksum(template.slice(0, 540))) {
-                template = template.slice(4, 540);
-            }
-            else {
-                template = false;
-            }
-        }
-    }
-//    console.log('Data: ', data);
-//    console.log('Data length: ', data.length);
-    if (data.readInt8(0) === 0) {
-        console.log('OK');
-    }
-    else {
-        console.log('Error: 0x', data.readInt8(3).toString(16).padStart(2, '0'));
-    }
-});
-
 // Load encryption module.
 
 const encryption = require('./build/Release/encryption');
@@ -57,6 +26,41 @@ const encryption = require('./build/Release/encryption');
 // Initialize variables.
 
 var encryptionEnabled = receivingTemplate = template = false;
+var fulldata = Buffer.alloc(0);
+
+port.on('data', function(data) {
+    console.log('Encryption enabled: ', encryptionEnabled);
+    if (encryptionEnabled) {
+        data = encryption.Decrypt(data);
+    }
+
+    fulldata = Buffer.concat([fulldata, data]);
+
+    // If all bytes received.
+    if (fulldata.length >= fulldata.readUInt16BE(1) + 3) {
+
+        // Analyze return code.
+        if (fulldata.readInt8(0) === 0) {
+            console.log('OK');
+
+            if (receivingTemplate) {
+                receivingTemplate = false;
+
+                // If checksum is correct.
+                if (fulldata.readInt32BE(540) === checksum(fulldata.slice(0, 540))) {
+                    template = fulldata.slice(4, 540);
+                }
+                else {
+                    template = false;
+                }
+            }
+        }
+        else {
+            console.log('Error: 0x', fulldata.readInt8(3).toString(16).padStart(2, '0'));
+        }
+        fulldata = Buffer.alloc(0);
+    }
+});
 
 // Different actions defined below.
 
