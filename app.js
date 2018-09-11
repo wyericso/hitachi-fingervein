@@ -25,7 +25,7 @@ const encryption = require('./build/Release/encryption');
 
 // Initialize variables.
 
-var encryptionEnabled = receivingTemplate = template = false;
+var encryptionEnabled = template = callback = false;
 var fulldata = Buffer.alloc(0);
 
 port.on('data', function(data) {
@@ -39,25 +39,11 @@ port.on('data', function(data) {
     if (fulldata.length >= fulldata.readUInt16BE(1) + 3) {
         console.log('Encryption enabled: ', encryptionEnabled);
 
-        // Analyze return code.
-        if (fulldata.readInt8(0) === 0) {
-            console.log('OK');
-
-            if (receivingTemplate) {
-                receivingTemplate = false;
-
-                // If checksum is correct.
-                if (fulldata.readInt32BE(540) === checksum(fulldata.slice(0, 540))) {
-                    template = fulldata.slice(4, 540);
-                }
-                else {
-                    template = false;
-                }
-            }
+        if (callback) {
+            callback(fulldata);
+            callback = false;
         }
-        else {
-            console.log('Error: 0x', fulldata.readInt8(3).toString(16).padStart(2, '0'));
-        }
+
         fulldata = Buffer.alloc(0);
     }
 });
@@ -76,6 +62,16 @@ app.get('/ledon', function(req, res) {
         buf = encryption.Encrypt(buf);
     }
 
+    callback = function(response) {
+        // Analyze return code.
+        if (response.readInt8(0) === 0) {
+            console.log('LED on OK.');
+        }
+        else {
+            console.log('Error: 0x%s', response.readInt8(3).toString(16).padStart(2, '0'));
+        }
+    };
+
     port.write(buf, function(err) {
         if (err) {
             return console.log('Error on write: ', err.message);
@@ -93,6 +89,16 @@ app.get('/ledoff', function(req, res) {
         buf = encryption.Encrypt(buf);
     }
 
+    callback = function(response) {
+        // Analyze return code.
+        if (response.readInt8(0) === 0) {
+            console.log('LED off OK.');
+        }
+        else {
+            console.log('Error: 0x%s', response.readInt8(3).toString(16).padStart(2, '0'));
+        }
+    };
+
     port.write(buf, function(err) {
         if (err) {
             return console.log('Error on write: ', err.message);
@@ -104,6 +110,16 @@ app.get('/ledoff', function(req, res) {
 
 app.get('/send_encryption_key', function(req, res) {
     const buf = Buffer.concat([Buffer.from([0x1f, 0x02, 0x00]), Buffer.alloc(512)]);
+
+    callback = function(response) {
+        // Analyze return code.
+        if (response.readInt8(0) === 0) {
+            console.log('Send encryption key OK.');
+        }
+        else {
+            console.log('Error: 0x%s', response.readInt8(3).toString(16).padStart(2, '0'));
+        }
+    };
 
     port.write(buf, function(err) {
         if (err) {
@@ -117,7 +133,6 @@ app.get('/send_encryption_key', function(req, res) {
 });
 
 app.get('/receive_template', function(req, res) {
-    receivingTemplate = true;
     template = Buffer.from([]);
 
     var buf = Buffer.from([0x15, 0x00, 0x00]);
@@ -127,10 +142,29 @@ app.get('/receive_template', function(req, res) {
         buf = encryption.Encrypt(buf);
     }
 
+    callback = function(response) {
+        // Analyze return code.
+        if (response.readInt8(0) === 0) {
+            console.log('Receive template OK.');
+
+            // If checksum is correct.
+            if (response.readInt32BE(540) === checksum(response.slice(0, 540))) {
+                template = response.slice(4, 540);
+            }
+            else {
+                template = false;
+            }
+        }
+        else {
+            console.log('Error: 0x%s', response.readInt8(3).toString(16).padStart(2, '0'));
+        }
+    };
+
     port.write(buf, function(err) {
         if (err) {
             return console.log('Error on write: ', err.message);
         }
+        console.log('Please place finger.');
     });
 
     res.redirect('/');
@@ -152,6 +186,16 @@ app.get('/send_template', function(req, res) {
         buf = encryption.Encrypt(buf);
     }
 
+    callback = function(response) {
+        // Analyze return code.
+        if (response.readInt8(0) === 0) {
+            console.log('Send template OK.');
+        }
+        else {
+            console.log('Error: 0x%s', response.readInt8(3).toString(16).padStart(2, '0'));
+        }
+    };
+
     port.write(buf, function(err) {
         if (err) {
             return console.log('Error on write: ', err.message);
@@ -169,10 +213,21 @@ app.get('/verification_1toN', function(req, res) {
         buf = encryption.Encrypt(buf);
     }
 
+    callback = function(response) {
+        // Analyze return code.
+        if (response.readInt8(0) === 0) {
+            console.log('Verification (1 to N) OK.');
+        }
+        else {
+            console.log('Error: 0x%s', response.readInt8(3).toString(16).padStart(2, '0'));
+        }
+    };
+
     port.write(buf, function(err) {
         if (err) {
             return console.log('Error on write: ', err.message);
         }
+        console.log('Please place finger.');
     });
 
     res.redirect('/');
@@ -186,6 +241,16 @@ app.get('/reset', function(req, res) {
         buf = encryption.Encrypt(buf);
     }
 
+    callback = function(response) {
+        // Analyze return code.
+        if (response.readInt8(0) === 0) {
+            console.log('Reset OK.');
+        }
+        else {
+            console.log('Error: 0x%s', response.readInt8(3).toString(16).padStart(2, '0'));
+        }
+    };
+
     port.write(buf, function(err) {
         if (err) {
             return console.log('Error on write: ', err.message);
@@ -195,6 +260,11 @@ app.get('/reset', function(req, res) {
     encryptionEnabled = false;
     res.redirect('/');
 });
+
+process.on('SIGINT', function() {
+    port.close();
+    process.exit();
+})
 
 var listener = app.listen(80, function() {
     console.log('Listening on port ' + listener.address().port);
