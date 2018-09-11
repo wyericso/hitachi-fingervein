@@ -161,6 +161,23 @@ app.get('/send_template', function(req, res) {
     res.redirect('/');
 });
 
+app.get('/verification_1toN', function(req, res) {
+    var buf = Buffer.from([0x13, 0x00, 0x02, 0x08]);
+
+    if (encryptionEnabled) {
+        buf = Buffer.concat([buf, Buffer.alloc(16 - buf.length)]);
+        buf = encryption.Encrypt(buf);
+    }
+
+    port.write(buf, function(err) {
+        if (err) {
+            return console.log('Error on write: ', err.message);
+        }
+    });
+
+    res.redirect('/');
+});
+
 app.get('/reset', function(req, res) {
     var buf = Buffer.from([0x17, 0x00, 0x00]);
 
@@ -177,11 +194,6 @@ app.get('/reset', function(req, res) {
 
     encryptionEnabled = false;
     res.redirect('/');
-});
-
-process.on('SIGINT', function() {
-    port.destroy();
-    process.exit();
 });
 
 var listener = app.listen(80, function() {
