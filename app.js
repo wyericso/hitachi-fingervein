@@ -27,6 +27,7 @@ const encryption = require('./build/Release/encryption');
 
 var encryptionEnabled = template = callback = false;
 var fulldata = Buffer.alloc(0);
+var templateNumber = 0;
 
 port.on('data', function(data) {
     if (encryptionEnabled) {
@@ -171,7 +172,11 @@ app.get('/receive_template', function(req, res) {
 });
 
 app.get('/send_template', function(req, res) {
-    var buf = Buffer.from([0x12, 0x02, 0x1d, 0x00]);
+    var buf = Buffer.from([0x12, 0x02, 0x1d, templateNumber++]);
+
+    if (templateNumber === 100) {
+        templateNumber = 0;
+    }
 
     if (template) {
         buf = Buffer.concat([buf, template]);
@@ -217,6 +222,7 @@ app.get('/verification_1toN', function(req, res) {
         // Analyze return code.
         if (response.readInt8(0) === 0) {
             console.log('Verification (1 to N) OK.');
+            console.log('Verified template number: ', response.readInt8(3));
         }
         else {
             console.log('Error: 0x%s', response.readInt8(3).toString(16).padStart(2, '0'));
