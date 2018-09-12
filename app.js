@@ -274,7 +274,7 @@ app.get('/api/receive_template', function(req, res) {
             if (response.readInt32BE(540) === checksum(response.slice(0, 540))) {
                 res.json({
                     'response': 'ok',
-                    'template': response.slice(4, 540)
+                    'template': Array.from(response.slice(4, 540))
                 });
             }
             else {
