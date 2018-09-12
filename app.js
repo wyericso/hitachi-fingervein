@@ -3,7 +3,8 @@ var app = express();
 var bodyParser = require('body-parser');
 
 function checksum(data) {
-    var offset = cs = 0;
+    var offset = 0;
+    var cs = 0;
     while (offset < data.length) {
         cs = cs ^ data.readInt32BE(offset);
         offset += 4;
@@ -26,7 +27,9 @@ const encryption = require('./build/Release/encryption');
 
 // Initialize variables.
 
-var encryptionEnabled = template = callback = false;
+var encryptionEnabled = false;
+var template = false;
+var callback = false;
 var fulldata = Buffer.alloc(0);
 var templateNumber = 0;
 
@@ -511,7 +514,7 @@ app.get('/api/reset', function(req, res) {
 process.on('SIGINT', function() {
     port.close();
     process.exit();
-})
+});
 
 var listener = app.listen(80, function() {
     console.log('Listening on port ' + listener.address().port);
