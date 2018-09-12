@@ -1,5 +1,6 @@
 var express = require('express');
 var app = express();
+var bodyParser = require('body-parser');
 
 function checksum(data) {
     var offset = cs = 0;
@@ -48,6 +49,8 @@ port.on('data', function(data) {
         fulldata = Buffer.alloc(0);
     }
 });
+
+var jsonParser = bodyParser.json();
 
 // Different actions / APIs defined below.
 
@@ -216,8 +219,6 @@ app.get('/api/send_encryption_key', function(req, res) {
 });
 
 app.get('/receive_template', function(req, res) {
-    template = Buffer.from([]);
-
     var buf = Buffer.from([0x15, 0x00, 0x00]);
 
     if (encryptionEnabled) {
@@ -254,7 +255,10 @@ app.get('/receive_template', function(req, res) {
 });
 
 app.get('/api/receive_template', function(req, res) {
-    template = Buffer.from([]);
+
+    // This API does the similar things of /receive_template. Instead of
+    // storing the template scanned, this API will give out HTTP response
+    // with template binary data.
 
     var buf = Buffer.from([0x15, 0x00, 0x00]);
 
@@ -268,14 +272,16 @@ app.get('/api/receive_template', function(req, res) {
         if (response.readInt8(0) === 0) {
             // If checksum is correct.
             if (response.readInt32BE(540) === checksum(response.slice(0, 540))) {
-                template = response.slice(4, 540);
-                res.json({'response': 'ok'});
+                res.json({
+                    'response': 'ok',
+                    'template': response.slice(4, 540)
+                });
             }
             else {
                 template = false;
                 res.json({
                     'response': 'error',
-                    'errorMsg': 'Invalid checksum.'
+                    'errorMsg': 'Invalid checksum received.'
                 });
             }
         }
@@ -333,15 +339,26 @@ app.get('/send_template', function(req, res) {
     res.redirect('/');
 });
 
-app.get('/api/send_template', function(req, res) {
+app.post('/api/send_template', jsonParser, function(req, res) {
+
+    // This API does the similar things of /send_template. Instead of
+    // sending the stored template, this API will accept HTTP request with
+    // template binary data.
+
     var buf = Buffer.from([0x12, 0x02, 0x1d, templateNumber++]);
 
     if (templateNumber === 100) {
         templateNumber = 0;
     }
 
-    if (template) {
-        buf = Buffer.concat([buf, template]);
+    if (req.body.template.length === 536) {
+        buf = Buffer.concat([buf, Buffer.from(req.body.template)]);
+    }
+    else {
+        res.json({
+            'response': 'error',
+            'errorMsg': 'Invalid template data'
+        });
     }
 
     // Adding checksum.  
