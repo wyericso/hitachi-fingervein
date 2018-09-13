@@ -1,8 +1,10 @@
 #!/bin/sh
 
-## May need to customize the commands below for tests.
-
-## Not including receive_template and verification_1toN as they need human interaction.
+##
+## - May need to customize the commands below for tests.
+## - Expected all showing '{"response":"ok"}'.
+## - Not including receive_template and verification_1toN as they need human interaction.
+##
 
 curl -H "Content-Type:application/json" "http://localhost/api/reset"
 curl -H "Content-Type:application/json" "http://localhost/api/ledon"
