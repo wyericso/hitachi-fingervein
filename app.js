@@ -304,11 +304,11 @@ app.get('/api/receive_template', function(req, res) {
 });
 
 app.get('/send_template', function(req, res) {
-    var buf = Buffer.from([0x12, 0x02, 0x1d, templateNumber++]);
-
     if (templateNumber === 100) {
         templateNumber = 0;
     }
+
+    var buf = Buffer.from([0x12, 0x02, 0x1d, templateNumber++]);
 
     if (template) {
         buf = Buffer.concat([buf, template]);
@@ -348,11 +348,11 @@ app.post('/api/send_template', jsonParser, function(req, res) {
     // sending the stored template, this API will accept HTTP request with
     // template binary data.
 
-    var buf = Buffer.from([0x12, 0x02, 0x1d, templateNumber++]);
-
     if (templateNumber === 100) {
         templateNumber = 0;
     }
+
+    var buf = Buffer.from([0x12, 0x02, 0x1d, templateNumber]);
 
     if (req.body.template.length === 536) {
         buf = Buffer.concat([buf, Buffer.from(req.body.template)]);
@@ -376,7 +376,10 @@ app.post('/api/send_template', jsonParser, function(req, res) {
     callback = function(response) {
         // Analyze return code.
         if (response.readInt8(0) === 0) {
-            res.json({'response': 'ok'});
+            res.json({
+                'response': 'ok',
+                'templateNumber': templateNumber++
+            });
         }
         else {
             res.json({
