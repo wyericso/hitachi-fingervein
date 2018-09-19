@@ -10,6 +10,17 @@
 - Use web browser to access port 80 of the server to open the web interface, or
 - Send HTTP GET / POST request to the REST API.
 
+## Instructions
+- Change the path of the finger vein device before running this application.
+It is now hardcoded as `/dev/ttyACM0` in:
+```
+var port = new SerialPort('/dev/ttyACM0', function (err) {
+    if (err) {
+        return console.log('Error: ', err.message);
+    }
+});
+```
+
 ## REST API List
 ### LED On
 ```
