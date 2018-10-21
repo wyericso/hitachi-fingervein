@@ -1,4 +1,4 @@
-# Hitachi Finger Vein Device (H1E-USB) Application
+# Hitachi Finger Vein Device (H1E-USB) API
 
 ## Basic Information
 - Tested on:
