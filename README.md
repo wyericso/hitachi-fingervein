@@ -7,7 +7,7 @@
   - node-gyp 3.8.0
 - Run "node-gyp rebuild" to compile C/C++ source files.
 - Run "sudo node app.js" to start the application.
-- Use web browser to access port 80 of the server to open the web interface, or
+- Use web browser to access port 8080 of the server to open the web interface, or
 - Send HTTP GET / POST request to the REST API.
 
 ## Instructions
