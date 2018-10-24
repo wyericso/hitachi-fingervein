@@ -55,6 +55,13 @@ port.on('data', function(data) {
 
 var jsonParser = bodyParser.json();
 
+// Set headers for Cross-Origin Resource Sharing (CORS)
+
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    next();
+});
+
 // Different actions / APIs defined below.
 
 app.get('/', function(req, res) {
