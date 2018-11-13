@@ -2,9 +2,17 @@
 
 ## Basic Information
 - Tested on:
-  - Ubuntu 16.04.5 Desktop
-  - Node.js 8.11.4 or 8.12.0
-  - node-gyp 3.8.0
+```
+|---------------------------|-----------|-----------|
+| OS                        | Node.js   | node-gyp  |
+|---------------------------|-----------|-----------|
+| Ubuntu 18.04.1 Desktop    | 10.13.0   | 3.8.0     |
+|---------------------------|-----------|-----------|
+| Ubuntu 16.04.5 Desktop    | 8.12.0    | 3.8.0     |
+|---------------------------|-----------|-----------|
+| Ubuntu 16.04.5 Desktop    | 8.11.4    | 3.8.0     |
+|---------------------------|-----------|-----------|
+```
 - Run "node-gyp rebuild" to compile C/C++ source files.
 - Run "sudo node app.js" to start the application.
 - Use web browser to access port 8080 of the server to open the web interface, or
@@ -81,3 +89,13 @@ curl -w "\n" -H "Content-Type:application/json" http://localhost:8080/api/reset
 ## Limitations
 - Hard-coded encryption key.
 - Supports storing 100 templates on device only. Storing the 101st template will overwrite the oldest one.
+
+## Notes of Ubuntu and Node.js Upgrade
+- After upgrading Ubuntu Desktop from 16.04.5 to 18.04.1 and Node.js from 8.12.0 to 10.13.0, ran `npm rebuild` to recover from below error.
+```
+Error: The module '/media/psf/Home/Documents/vscode/hitachi-fingervein/node_modules/@serialport/bindings/build/Release/bindings.node'
+was compiled against a different Node.js version using
+NODE_MODULE_VERSION 57. This version of Node.js requires
+NODE_MODULE_VERSION 64. Please try re-compiling or re-installing
+the module (for instance, using `npm rebuild` or `npm install`).
+```
