@@ -30,17 +30,33 @@ var port = new SerialPort('/dev/ttyACM0', function (err) {
 ```
 
 ## REST API List
-### LED On
+### LED Green On
 ```
-curl -w "\n" -H "Content-Type:application/json" "http://localhost:8080/api/ledon"
+curl -w "\n" -H "Content-Type:application/json" "http://localhost:8080/api/ledgreenon"
 ```
 ```
 {"response":"ok"}
 ```
 
-### LED Off
+### LED Green Off
 ```
-curl -w "\n" -H "Content-Type:application/json" "http://localhost:8080/api/ledoff"
+curl -w "\n" -H "Content-Type:application/json" "http://localhost:8080/api/ledgreenoff"
+```
+```
+{"response":"ok"}
+```
+
+### LED Red On
+```
+curl -w "\n" -H "Content-Type:application/json" "http://localhost:8080/api/ledredon"
+```
+```
+{"response":"ok"}
+```
+
+### LED Red Off
+```
+curl -w "\n" -H "Content-Type:application/json" "http://localhost:8080/api/ledredoff"
 ```
 ```
 {"response":"ok"}

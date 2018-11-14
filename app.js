@@ -68,7 +68,7 @@ app.get('/', function(req, res) {
     res.sendFile(__dirname + '/views/index.html');
 });
 
-app.get('/ledon', function(req, res) {
+app.get('/ledgreenon', function(req, res) {
     var buf = Buffer.from([0x11, 0x00, 0x02, 0x02, 0x01]);
 
     if (encryptionEnabled) {
@@ -79,7 +79,7 @@ app.get('/ledon', function(req, res) {
     callback = function(response) {
         // Analyze return code.
         if (response.readInt8(0) === 0) {
-            console.log('LED on OK.');
+            console.log('LED green on OK.');
         }
         else {
             console.log('Error: 0x%s', response.readInt8(3).toString(16).padStart(2, '0'));
@@ -95,7 +95,7 @@ app.get('/ledon', function(req, res) {
     res.redirect('/');
 });
 
-app.get('/api/ledon', function(req, res) {
+app.get('/api/ledgreenon', function(req, res) {
     var buf = Buffer.from([0x11, 0x00, 0x02, 0x02, 0x01]);
 
     if (encryptionEnabled) {
@@ -123,7 +123,7 @@ app.get('/api/ledon', function(req, res) {
     });
 });
 
-app.get('/ledoff', function(req, res) {
+app.get('/ledgreenoff', function(req, res) {
     var buf = Buffer.from([0x11, 0x00, 0x02, 0x02, 0x00]);
 
     if (encryptionEnabled) {
@@ -134,7 +134,7 @@ app.get('/ledoff', function(req, res) {
     callback = function(response) {
         // Analyze return code.
         if (response.readInt8(0) === 0) {
-            console.log('LED off OK.');
+            console.log('LED green off OK.');
         }
         else {
             console.log('Error: 0x%s', response.readInt8(3).toString(16).padStart(2, '0'));
@@ -150,8 +150,118 @@ app.get('/ledoff', function(req, res) {
     res.redirect('/');
 });
 
-app.get('/api/ledoff', function(req, res) {
+app.get('/api/ledgreenoff', function(req, res) {
     var buf = Buffer.from([0x11, 0x00, 0x02, 0x02, 0x00]);
+
+    if (encryptionEnabled) {
+        buf = Buffer.concat([buf, Buffer.alloc(16 - buf.length)]);
+        buf = encryption.Encrypt(buf);
+    }
+
+    callback = function(response) {
+        // Analyze return code.
+        if (response.readInt8(0) === 0) {
+            res.json({'response': 'ok'});
+        }
+        else {
+            res.json({
+                'response': 'error',
+                'errorCode': response.readInt8(3)
+            });
+        }
+    };
+
+    port.write(buf, function(err) {
+        if (err) {
+            return console.log('Error on write: ', err.message);
+        }
+    });
+});
+
+app.get('/ledredon', function(req, res) {
+    var buf = Buffer.from([0x11, 0x00, 0x02, 0x01, 0x01]);
+
+    if (encryptionEnabled) {
+        buf = Buffer.concat([buf, Buffer.alloc(16 - buf.length)]);
+        buf = encryption.Encrypt(buf);
+    }
+
+    callback = function(response) {
+        // Analyze return code.
+        if (response.readInt8(0) === 0) {
+            console.log('LED red on OK.');
+        }
+        else {
+            console.log('Error: 0x%s', response.readInt8(3).toString(16).padStart(2, '0'));
+        }
+    };
+
+    port.write(buf, function(err) {
+        if (err) {
+            return console.log('Error on write: ', err.message);
+        }
+    });
+
+    res.redirect('/');
+});
+
+app.get('/api/ledredon', function(req, res) {
+    var buf = Buffer.from([0x11, 0x00, 0x02, 0x01, 0x01]);
+
+    if (encryptionEnabled) {
+        buf = Buffer.concat([buf, Buffer.alloc(16 - buf.length)]);
+        buf = encryption.Encrypt(buf);
+    }
+
+    callback = function(response) {
+        // Analyze return code.
+        if (response.readInt8(0) === 0) {
+            res.json({'response': 'ok'});
+        }
+        else {
+            res.json({
+                'response': 'error',
+                'errorCode': response.readInt8(3)
+            });
+        }
+    };
+
+    port.write(buf, function(err) {
+        if (err) {
+            return console.log('Error on write: ', err.message);
+        }
+    });
+});
+
+app.get('/ledredoff', function(req, res) {
+    var buf = Buffer.from([0x11, 0x00, 0x02, 0x01, 0x00]);
+
+    if (encryptionEnabled) {
+        buf = Buffer.concat([buf, Buffer.alloc(16 - buf.length)]);
+        buf = encryption.Encrypt(buf);
+    }
+
+    callback = function(response) {
+        // Analyze return code.
+        if (response.readInt8(0) === 0) {
+            console.log('LED red off OK.');
+        }
+        else {
+            console.log('Error: 0x%s', response.readInt8(3).toString(16).padStart(2, '0'));
+        }
+    };
+
+    port.write(buf, function(err) {
+        if (err) {
+            return console.log('Error on write: ', err.message);
+        }
+    });
+
+    res.redirect('/');
+});
+
+app.get('/api/ledredoff', function(req, res) {
+    var buf = Buffer.from([0x11, 0x00, 0x02, 0x01, 0x00]);
 
     if (encryptionEnabled) {
         buf = Buffer.concat([buf, Buffer.alloc(16 - buf.length)]);

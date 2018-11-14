@@ -7,8 +7,10 @@
 ##
 
 curl -w "\n" -H "Content-Type:application/json" "http://localhost:8080/api/reset"
-curl -w "\n" -H "Content-Type:application/json" "http://localhost:8080/api/ledon"
-curl -w "\n" -H "Content-Type:application/json" "http://localhost:8080/api/ledoff"
+curl -w "\n" -H "Content-Type:application/json" "http://localhost:8080/api/ledgreenon"
+curl -w "\n" -H "Content-Type:application/json" "http://localhost:8080/api/ledgreenoff"
+curl -w "\n" -H "Content-Type:application/json" "http://localhost:8080/api/ledredon"
+curl -w "\n" -H "Content-Type:application/json" "http://localhost:8080/api/ledredoff"
 curl -w "\n" -H "Content-Type:application/json" "http://localhost:8080/api/send_encryption_key"
 curl -w "\n" -H "Content-Type:application/json" -d@/media/psf/Home/Downloads/fingervein/index_l.json "http://localhost:8080/api/send_template"
 curl -w "\n" -H "Content-Type:application/json" -d@/media/psf/Home/Downloads/fingervein/middle_l.json "http://localhost:8080/api/send_template"
