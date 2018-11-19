@@ -123,6 +123,61 @@ app.get('/api/ledgreenon', function(req, res) {
     });
 });
 
+app.get('/ledgreenblink', function(req, res) {
+    var buf = Buffer.from([0x11, 0x00, 0x04, 0x02, 0x02, 0x10, 0x10]);
+
+    if (encryptionEnabled) {
+        buf = Buffer.concat([buf, Buffer.alloc(16 - buf.length)]);
+        buf = encryption.Encrypt(buf);
+    }
+
+    callback = function(response) {
+        // Analyze return code.
+        if (response.readInt8(0) === 0) {
+            console.log('LED green blink OK.');
+        }
+        else {
+            console.log('Error: 0x%s', response.readInt8(3).toString(16).padStart(2, '0'));
+        }
+    };
+
+    port.write(buf, function(err) {
+        if (err) {
+            return console.log('Error on write: ', err.message);
+        }
+    });
+
+    res.redirect('/');
+});
+
+app.get('/api/ledgreenblink', function(req, res) {
+    var buf = Buffer.from([0x11, 0x00, 0x04, 0x02, 0x02, 0x10, 0x10]);
+
+    if (encryptionEnabled) {
+        buf = Buffer.concat([buf, Buffer.alloc(16 - buf.length)]);
+        buf = encryption.Encrypt(buf);
+    }
+
+    callback = function(response) {
+        // Analyze return code.
+        if (response.readInt8(0) === 0) {
+            res.json({'response': 'ok'});
+        }
+        else {
+            res.json({
+                'response': 'error',
+                'errorCode': response.readInt8(3)
+            });
+        }
+    };
+
+    port.write(buf, function(err) {
+        if (err) {
+            return console.log('Error on write: ', err.message);
+        }
+    });
+});
+
 app.get('/ledgreenoff', function(req, res) {
     var buf = Buffer.from([0x11, 0x00, 0x02, 0x02, 0x00]);
 
@@ -207,6 +262,61 @@ app.get('/ledredon', function(req, res) {
 
 app.get('/api/ledredon', function(req, res) {
     var buf = Buffer.from([0x11, 0x00, 0x02, 0x01, 0x01]);
+
+    if (encryptionEnabled) {
+        buf = Buffer.concat([buf, Buffer.alloc(16 - buf.length)]);
+        buf = encryption.Encrypt(buf);
+    }
+
+    callback = function(response) {
+        // Analyze return code.
+        if (response.readInt8(0) === 0) {
+            res.json({'response': 'ok'});
+        }
+        else {
+            res.json({
+                'response': 'error',
+                'errorCode': response.readInt8(3)
+            });
+        }
+    };
+
+    port.write(buf, function(err) {
+        if (err) {
+            return console.log('Error on write: ', err.message);
+        }
+    });
+});
+
+app.get('/ledredblink', function(req, res) {
+    var buf = Buffer.from([0x11, 0x00, 0x04, 0x01, 0x02, 0x10, 0x10]);
+
+    if (encryptionEnabled) {
+        buf = Buffer.concat([buf, Buffer.alloc(16 - buf.length)]);
+        buf = encryption.Encrypt(buf);
+    }
+
+    callback = function(response) {
+        // Analyze return code.
+        if (response.readInt8(0) === 0) {
+            console.log('LED red blink OK.');
+        }
+        else {
+            console.log('Error: 0x%s', response.readInt8(3).toString(16).padStart(2, '0'));
+        }
+    };
+
+    port.write(buf, function(err) {
+        if (err) {
+            return console.log('Error on write: ', err.message);
+        }
+    });
+
+    res.redirect('/');
+});
+
+app.get('/api/ledredblink', function(req, res) {
+    var buf = Buffer.from([0x11, 0x00, 0x04, 0x01, 0x02, 0x10, 0x10]);
 
     if (encryptionEnabled) {
         buf = Buffer.concat([buf, Buffer.alloc(16 - buf.length)]);

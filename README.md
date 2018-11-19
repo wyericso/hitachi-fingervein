@@ -38,6 +38,14 @@ curl -w "\n" -H "Content-Type:application/json" "http://localhost:8080/api/ledgr
 {"response":"ok"}
 ```
 
+### LED Green Blink
+```
+curl -w "\n" -H "Content-Type:application/json" "http://localhost:8080/api/ledgreenblink"
+```
+```
+{"response":"ok"}
+```
+
 ### LED Green Off
 ```
 curl -w "\n" -H "Content-Type:application/json" "http://localhost:8080/api/ledgreenoff"
@@ -49,6 +57,14 @@ curl -w "\n" -H "Content-Type:application/json" "http://localhost:8080/api/ledgr
 ### LED Red On
 ```
 curl -w "\n" -H "Content-Type:application/json" "http://localhost:8080/api/ledredon"
+```
+```
+{"response":"ok"}
+```
+
+### LED Red Blink
+```
+curl -w "\n" -H "Content-Type:application/json" "http://localhost:8080/api/ledredblink"
 ```
 ```
 {"response":"ok"}
