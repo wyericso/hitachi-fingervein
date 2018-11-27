@@ -131,3 +131,7 @@ NODE_MODULE_VERSION 57. This version of Node.js requires
 NODE_MODULE_VERSION 64. Please try re-compiling or re-installing
 the module (for instance, using `npm rebuild` or `npm install`).
 ```
+
+## Notes of Hitachi Finger Vein Device (H1E-USB) ##
+- It is found that after plugging in the device to a computer, some error codes were sent out from the device indicating that there were firmware upgrade failures. It is advised to wait for 1 minute after plugging in the device, before starting this API.
+- The shell script `init_device.sh` provided can be run to test if the device is responding correctly, before starting this API.
